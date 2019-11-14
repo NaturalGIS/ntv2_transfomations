@@ -111,6 +111,19 @@ def it_transformation(epsg, grid):
         elif epsg == 23032:
             gridFile = os.path.join(pluginPath, 'grids', 'RER_ED50_ETRS89_GPS7_K2.GSB')
             return True, '+proj=utm +zone=32 +ellps=intl +nadgrids={} +wktext +units=m +no_defs'.format(gridFile)
+    elif grid == 'ITALY_ETRS89':
+        if epsg == 3003:
+            gridFile = os.path.join(pluginPath, 'grids', 'NadRoma40.gsb')
+            return True, '+proj=tmerc +lat_0=0 +lon_0=9 +k=0.9996 +x_0=1500000 +y_0=0 +ellps=intl +nadgrids={} +wktext +units=m +no_defs'.format(gridFile)
+        elif epsg == 3004:
+            gridFile = os.path.join(pluginPath, 'grids', 'NadRoma40.gsb')
+            return True, '+proj=tmerc +lat_0=0 +lon_0=15 +k=0.9996 +x_0=2520000 +y_0=0 +ellps=intl +nadgrids={} +wktext +units=m +no_defs'.format(gridFile)
+        elif epsg == 23032:
+            gridFile = os.path.join(pluginPath, 'grids', 'NadED50.gsb')
+            return True, '+proj=utm +zone=32 +ellps=intl +nadgrids={} +wktext +units=m +no_defs'.format(gridFile)
+        elif epsg == 23033:
+            gridFile = os.path.join(pluginPath, 'grids', 'NadED50.gsb')
+            return True, '+proj=utm +zone=33 +ellps=intl +nadgrids={} +wktext +units=m +no_defs'.format(gridFile)
 
     return False, NO_TRANSFORMATION
 

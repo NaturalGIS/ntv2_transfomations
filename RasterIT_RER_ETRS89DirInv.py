@@ -60,10 +60,10 @@ class RasterIT_RER_ETRS89DirInv(GdalAlgorithm):
         return 'itrastertransform'
 
     def displayName(self):
-        return '[IT] Direct and inverse Raster Transformation'
+        return '[IT] (Emilia Romagna) Raster - Direct and inverse Transformation'
 
     def group(self):
-        return '[IT] Italy (Emilia-Romagna)'
+        return '[IT] Italy'
 
     def groupId(self):
         return 'italy'
@@ -86,7 +86,7 @@ class RasterIT_RER_ETRS89DirInv(GdalAlgorithm):
                        ('UTM - ED50 [EPSG:23032]', 23032),
                       )
 
-        self.grids = (('Grigliati NTv2 RER 2013 la trasformazione di coordinate in Emilia-Romagna', 'RER_ETRS89'),
+        self.grids = (('Grigliati NTv2 RER 2013 per la trasformazione di coordinate in Emilia-Romagna', 'RER_ETRS89'),
                      )
 
         self.addParameter(QgsProcessingParameterRasterLayer(self.INPUT,

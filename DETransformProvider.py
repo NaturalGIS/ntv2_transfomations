@@ -41,6 +41,7 @@ from ntv2_transformations.VectorES_ED50ERTS89DirInv import VectorES_ED50ERTS89Di
 from ntv2_transformations.RasterES_ED50ERTS89DirInv import RasterES_ED50ERTS89DirInv
 from ntv2_transformations.VectorIT_RER_ETRS89DirInv import VectorIT_RER_ETRS89DirInv
 from ntv2_transformations.RasterIT_RER_ETRS89DirInv import RasterIT_RER_ETRS89DirInv
+from ntv2_transformations.VectorIT_ITALY_ETRS89DirInv import VectorIT_ITALY_ETRS89DirInv
 from ntv2_transformations.VectorCH_LV95ETRS89DirInv import VectorCH_LV95ETRS89DirInv
 from ntv2_transformations.RasterCH_LV95ETRS89DirInv import RasterCH_LV95ETRS89DirInv
 from ntv2_transformations.VectorUK_OSGB36ETRS89DirInv import VectorUK_OSGB36ETRS89DirInv
@@ -106,6 +107,7 @@ class DETransformProvider(QgsProcessingProvider):
                 RasterES_ED50ERTS89DirInv(),
                 VectorIT_RER_ETRS89DirInv(),
                 RasterIT_RER_ETRS89DirInv(),
+                VectorIT_ITALY_ETRS89DirInv(),
                 VectorCH_LV95ETRS89DirInv(),
                 RasterCH_LV95ETRS89DirInv(),
                 VectorUK_OSGB36ETRS89DirInv(),

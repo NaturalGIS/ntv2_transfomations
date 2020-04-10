@@ -32,7 +32,9 @@ from qgis.PyQt.QtGui import QIcon
 from qgis.core import QgsProcessingProvider
 from processing.core.ProcessingConfig import ProcessingConfig, Setting
 from processing.tools import system
+from qgis.utils import iface
 
+from ntv2_transformations.VectorDE_BY_GK4_UTM32DirInv import VectorDE_BY_GK4_UTM32DirInv
 from ntv2_transformations.VectorDE_GK3ETRS8932NDirInv import VectorDE_GK3ETRS8932NDirInv
 from ntv2_transformations.RasterDE_GK3ETRS8932NDirInv import RasterDE_GK3ETRS8932NDirInv
 from ntv2_transformations.VectorPT_ETR89PTTM06DirInv import VectorPT_ETR89PTTM06DirInv
@@ -101,6 +103,7 @@ class DETransformProvider(QgsProcessingProvider):
         algs = [VectorPT_ETR89PTTM06DirInv(),
                 RasterPT_ETR89PTTM06DirInv(),
                 VectorDE_GK3ETRS8932NDirInv(),
+                VectorDE_BY_GK4_UTM32DirInv(),
                 RasterDE_GK3ETRS8932NDirInv(),
                 VectorES_ED50ERTS89DirInv(),
                 RasterES_ED50ERTS89DirInv(),

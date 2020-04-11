@@ -44,6 +44,9 @@ if (" " in pluginPath):
     except FileNotFoundError:
         print("Cannot create Symbolic link to map your plugin directory.")
         raise
+    except OSError:
+        print("WINDOWS ERROR: You have unsufficient permission to create a symbolic link. Try to run as Administrator.")
+        raise
 
 NO_TRANSFORMATION = 'No transformation found for given parameters combination.'
 

@@ -26,7 +26,6 @@ __copyright__ = '(C) 2019, Giovanni Manghi'
 __revision__ = '$Format:%H$'
 
 import os
-from urllib.request import urlretrieve
 
 from qgis.PyQt.QtGui import QIcon
 
@@ -38,8 +37,6 @@ from qgis.core import (QgsRasterFileWriter,
                        QgsMessageLog,
                        Qgis
                       )
-
-from qgis.utils import iface
 
 from processing.algs.gdal.GdalAlgorithm import GdalAlgorithm
 from processing.algs.gdal.GdalUtils import GdalUtils
@@ -121,9 +118,15 @@ class RasterDE_BY_GK4_UTM32DirInv(GdalAlgorithm):
         epsg = self.datums[self.parameterAsEnum(parameters, self.CRS, context)][1]
         grid = self.grids[self.parameterAsEnum(parameters, self.GRID, context)][1]
 
+        gridFile = os.path.join(pluginPath, 'grids', 'BY_KANU.gsb')
+        if not os.path.isfile(gridFile):
+            error_message = 'ERROR GRID FILE NOT FOUND / USER ACTION REQUIRED:\nThe grid file BY_KANU.gsb is to big to be downloaded in the background (3.03 GB), but therefore has a high transformation accuracy of +- 1cm.\n\nFollowing steps are required:\n1. Download the grid from "http://geodaten.bayern.de/oadownload/bvv_internet/kanu/ntv2_bayern.zip"\n2. Unzip the file and rename it to "BY_KANU.gsb"\n3. Move the file to following location: "{}"'.format(gridFile)
+            QgsMessageLog.logMessage(error_message, level=Qgis.Critical)
+            raise QgsProcessingException(error_message)
+
         found, text = de_transformation(epsg, grid)
         if not found:
-           raise QgsProcessingException(text)
+            raise QgsProcessingException(text)
 
         arguments = []
 
@@ -146,11 +149,4 @@ class RasterDE_BY_GK4_UTM32DirInv(GdalAlgorithm):
         arguments.append(inLayer.source())
         arguments.append(outFile)
 
-        gridFile = os.path.join(pluginPath, 'grids', 'BY_KANU.gsb')
-        if not os.path.isfile(gridFile):
-            #TODO (Best way, altough a lot of effort): 1) Display popup which informs the user about the big file size with OK and EXIT Buttons > OnClick OK: Download file with progress bar... 3) save downloaded file and unzip it in the plugins folder 4) proceed with transforming the geodata
-            error_message = 'ERROR GRID FILE NOT FOUND / USER ACTION REQUIRED:\nThe grid file BY_KANU.gsb is to big to be downloaded in the background (3.03 GB), but therefore has a high transformation accuracy of +- 1cm.\n\nFollowing steps are required:\n1. Download the grid from "http://geodaten.bayern.de/oadownload/bvv_internet/kanu/ntv2_bayern.zip"\n2. Unzip the file and rename it to "BY_KANU.gsb"\n3. Move the file to following location: "{}"'.format(gridFile)
-            QgsMessageLog.logMessage(error_message, level=Qgis.Critical)
-            iface.messageBar().pushMessage(error_message, level=Qgis.Critical, duration=30)
-            return [error_message]
         return ['gdalwarp', GdalUtils.escapeAndJoin(arguments)]

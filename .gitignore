@@ -1,2 +1,5 @@
 .directory
 *.pyc
+*.gsb
+.DS_Store
+*.bak

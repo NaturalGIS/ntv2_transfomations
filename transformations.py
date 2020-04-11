@@ -28,6 +28,26 @@ __revision__ = '$Format:%H$'
 import os
 
 pluginPath = os.path.dirname(__file__)
+if (" " in pluginPath):
+    #Default plugin locations: http://planet.qgis.org/planet/user/3/tag/qgis3/
+    #BUG on Mac OS X: the nadgrids pointing to the default plugin folder which contains spaces and therefore the ogr command fails!
+    #WORKAROUND: create symlink in userdirectory without spaces
+    #WORKAROUND ALTERNATIVE: use the PROJ_LIB environment variable to point to the plugin directory and reference the grids by relative paths
+    symlink = os.path.join(os.path.expanduser("~"),".qgis3_ntv2_transformation_plugin")
+    try:
+        os.symlink(pluginPath,symlink)
+        pluginPath = symlink
+        pass
+    except FileExistsError:
+        pluginPath = symlink
+        pass
+    except FileNotFoundError:
+        print("Cannot create Symbolic link to map your plugin directory.")
+        raise
+    except OSError:
+        print("WINDOWS ERROR: You have unsufficient permission to create a symbolic link. Try to run as Administrator.")
+        raise
+
 NO_TRANSFORMATION = 'No transformation found for given parameters combination.'
 
 
@@ -66,6 +86,9 @@ def de_transformation(epsg, grid):
     if grid == 'BETA2007':
         if epsg == 31467:
             return True, '+proj=tmerc +lat_0=0 +lon_0=9 +k=1 +x_0=3500000 +y_0=0 +ellps=bessel +nadgrids={} +wktext +units=m +no_defs'.format(gridFile)
+    if grid == 'BY_KANU':
+        if epsg == 5678:
+            return True, '+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +ellps=bessel +nadgrids={} +wktext +units=m +no_defs'.format(gridFile)
 
     return False, NO_TRANSFORMATION
 

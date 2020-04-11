@@ -37,6 +37,7 @@ from qgis.utils import iface
 from ntv2_transformations.VectorDE_BY_GK4_UTM32DirInv import VectorDE_BY_GK4_UTM32DirInv
 from ntv2_transformations.VectorDE_GK3ETRS8932NDirInv import VectorDE_GK3ETRS8932NDirInv
 from ntv2_transformations.RasterDE_GK3ETRS8932NDirInv import RasterDE_GK3ETRS8932NDirInv
+from ntv2_transformations.RasterDE_BY_GK4_UTM32DirInv import RasterDE_BY_GK4_UTM32DirInv
 from ntv2_transformations.VectorPT_ETR89PTTM06DirInv import VectorPT_ETR89PTTM06DirInv
 from ntv2_transformations.RasterPT_ETR89PTTM06DirInv import RasterPT_ETR89PTTM06DirInv
 from ntv2_transformations.VectorES_ED50ERTS89DirInv import VectorES_ED50ERTS89DirInv
@@ -105,6 +106,7 @@ class DETransformProvider(QgsProcessingProvider):
                 VectorDE_GK3ETRS8932NDirInv(),
                 VectorDE_BY_GK4_UTM32DirInv(),
                 RasterDE_GK3ETRS8932NDirInv(),
+                RasterDE_BY_GK4_UTM32DirInv(),
                 VectorES_ED50ERTS89DirInv(),
                 RasterES_ED50ERTS89DirInv(),
                 VectorIT_RER_ETRS89DirInv(),

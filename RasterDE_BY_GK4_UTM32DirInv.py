@@ -2,7 +2,7 @@
 
 """
 ***************************************************************************
-    VectorDE_BY_GK4_UTM32DirInv.py
+    RasterDE_BY_GK4_UTM32DirInv.py
     ---------------------
     Date                 : April 2020
     Copyright            : (C) 2019 by Giovanni Manghi
@@ -17,7 +17,7 @@
 ***************************************************************************
 """
 
-__author__ = 'Alexander Bruy, Giovanni Manghi'
+__author__ = 'Alexander Bruy, Giovanni Manghi, Valentin Marquart'
 __date__ = 'April 2020'
 __copyright__ = '(C) 2019, Giovanni Manghi'
 
@@ -30,16 +30,16 @@ from urllib.request import urlretrieve
 
 from qgis.PyQt.QtGui import QIcon
 
-from qgis.core import (QgsProcessingException,
-                       QgsProcessingParameterFeatureSource,
+from qgis.core import (QgsRasterFileWriter,
+                       QgsProcessingException,
+                       QgsProcessingParameterRasterLayer,
                        QgsProcessingParameterEnum,
-                       QgsProcessingParameterVectorDestination,
+                       QgsProcessingParameterRasterDestination,
                        QgsMessageLog,
                        Qgis
                       )
 
 from qgis.utils import iface
-
 
 from processing.algs.gdal.GdalAlgorithm import GdalAlgorithm
 from processing.algs.gdal.GdalUtils import GdalUtils
@@ -49,7 +49,7 @@ from ntv2_transformations.transformations import de_transformation
 pluginPath = os.path.dirname(__file__)
 
 
-class VectorDE_BY_GK4_UTM32DirInv(GdalAlgorithm):
+class RasterDE_BY_GK4_UTM32DirInv(GdalAlgorithm):
 
     INPUT = 'INPUT'
     TRANSF = 'TRANSF'
@@ -61,10 +61,10 @@ class VectorDE_BY_GK4_UTM32DirInv(GdalAlgorithm):
         super().__init__()
 
     def name(self):
-        return 'debyvectortransform'
+        return 'debyrastertransform'
 
     def displayName(self):
-        return '[DE-BY] Direct and inverse Vector Transformation'
+        return '[DE-BY] Direct and inverse Raster Transformation'
 
     def group(self):
         return '[DE] Germany'
@@ -73,10 +73,10 @@ class VectorDE_BY_GK4_UTM32DirInv(GdalAlgorithm):
         return 'germany'
 
     def tags(self):
-        return 'vector,grid,ntv2,direct,inverse,germany,bavaria'.split(',')
+        return 'raster,grid,ntv2,direct,inverse,germany,bavaria'.split(',')
 
     def shortHelpString(self):
-        return 'Direct and inverse vector transformations using Germany NTv2 grids.'
+        return 'Direct and inverse raster transformations using Germany NTv2 grids.'
 
     def icon(self):
         return QIcon(os.path.join(pluginPath, 'icons', 'de.png'))
@@ -92,8 +92,8 @@ class VectorDE_BY_GK4_UTM32DirInv(GdalAlgorithm):
         self.grids = (('BY-KanU (CC-BY-ND; High accuracy for Bavaria)', 'BY_KANU'),
                      )
 
-        self.addParameter(QgsProcessingParameterFeatureSource(self.INPUT,
-                                                              'Input vector'))
+        self.addParameter(QgsProcessingParameterRasterLayer(self.INPUT,
+                                                            'Input raster'))
         self.addParameter(QgsProcessingParameterEnum(self.TRANSF,
                                                      'Transformation',
                                                      options=self.directions,
@@ -106,17 +106,16 @@ class VectorDE_BY_GK4_UTM32DirInv(GdalAlgorithm):
                                                      'NTv2 Grid',
                                                      options=[i[0] for i in self.grids],
                                                      defaultValue=0))
-        self.addParameter(QgsProcessingParameterVectorDestination(self.OUTPUT,
+        self.addParameter(QgsProcessingParameterRasterDestination(self.OUTPUT,
                                                                   'Output'))
 
     def getConsoleCommands(self, parameters, context, feedback, executing=True):
-        ogrLayer, layerName = self.getOgrCompatibleSource(self.INPUT, parameters, context, feedback, executing)
+        inLayer = self.parameterAsRasterLayer(parameters, self.INPUT, context)
+        if inLayer is None:
+            raise QgsProcessingException(self.invalidRasterError(parameters, self.INPUT))
+
         outFile = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
         self.setOutputValue(self.OUTPUT, outFile)
-
-        output, outputFormat = GdalUtils.ogrConnectionStringAndFormat(outFile, context)
-        if outputFormat in ('SQLite', 'GPKG') and os.path.isfile(output):
-            raise QgsProcessingException('Output file "{}" already exists.'.format(output))
 
         direction = self.parameterAsEnum(parameters, self.TRANSF, context)
         epsg = self.datums[self.parameterAsEnum(parameters, self.CRS, context)][1]
@@ -130,38 +129,22 @@ class VectorDE_BY_GK4_UTM32DirInv(GdalAlgorithm):
 
         if direction == 0:
             # Direct transformation
-            arguments.append('-s_srs')            
+            arguments.append('-s_srs')
             arguments.append(text)
             arguments.append('-t_srs')
             arguments.append('EPSG:25832')
-
-            arguments.append('-f {}'.format(outputFormat))
-            arguments.append('-lco')
-            arguments.append('ENCODING=UTF-8')
-
-            arguments.append(output)
-            arguments.append(ogrLayer)
-            arguments.append(layerName)
         else:
             # Inverse transformation
-            arguments.append('-s_srs')
+            arguments = ['-s_srs']
             arguments.append('EPSG:25832')
             arguments.append('-t_srs')
             arguments.append(text)
-            arguments.append('-f')
-            arguments.append('Geojson')
-            arguments.append('/vsistdout/')
-            arguments.append(ogrLayer)
-            arguments.append(layerName)
-            arguments.append('-lco')
-            arguments.append('ENCODING=UTF-8')
-            arguments.append('|')
-            arguments.append('ogr2ogr')
-            arguments.append('-f {}'.format(outputFormat))
-            arguments.append('-a_srs')
-            arguments.append('EPSG:5678')
-            arguments.append(output)
-            arguments.append('/vsistdin/')
+
+        arguments.append('-multi')
+        arguments.append('-of')
+        arguments.append(QgsRasterFileWriter.driverForExtension(os.path.splitext(outFile)[1]))
+        arguments.append(inLayer.source())
+        arguments.append(outFile)
 
         gridFile = os.path.join(pluginPath, 'grids', 'BY_KANU.gsb')
         if not os.path.isfile(gridFile):
@@ -170,4 +153,4 @@ class VectorDE_BY_GK4_UTM32DirInv(GdalAlgorithm):
             QgsMessageLog.logMessage(error_message, level=Qgis.Critical)
             iface.messageBar().pushMessage(error_message, level=Qgis.Critical, duration=30)
             return [error_message]
-        return ['ogr2ogr', GdalUtils.escapeAndJoin(arguments)]
+        return ['gdalwarp', GdalUtils.escapeAndJoin(arguments)]

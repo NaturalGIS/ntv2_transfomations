@@ -32,6 +32,7 @@ if (" " in pluginPath):
     #Default plugin locations: http://planet.qgis.org/planet/user/3/tag/qgis3/
     #BUG on Mac OS X: the nadgrids pointing to the default plugin folder which contains spaces and therefore the ogr command fails!
     #WORKAROUND: create symlink in userdirectory without spaces
+    #WORKAROUND ALTERNATIVE: use the PROJ_LIB environment variable to point to the plugin directory and reference the grids by relative paths
     symlink = os.path.join(os.path.expanduser("~"),".qgis3_ntv2_transformation_plugin")
     try:
         os.symlink(pluginPath,symlink)
@@ -41,7 +42,7 @@ if (" " in pluginPath):
         pluginPath = symlink
         pass
     except FileNotFoundError:
-        print("Cannot create Symbolic link to map your plugin directory without spaces.")
+        print("Cannot create Symbolic link to map your plugin directory.")
         raise
 
 NO_TRANSFORMATION = 'No transformation found for given parameters combination.'
